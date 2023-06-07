@@ -28,7 +28,7 @@ function CadastroUsuario() {
   });
 
   // state para armazenar o campo de confirmação de senha, e fazer a checagem com a senha do usuário
-  const [confirmarSenha, setConfirmarSenha] = useState('');
+  const [confirmarSenha, setConfirmarSenha] = useState<string>('');
 
   // função para atualizar o estado do confirmar senha
   function confirmSenha(event: ChangeEvent<HTMLInputElement>) {
@@ -89,7 +89,6 @@ function CadastroUsuario() {
                   <Typography align="center" variant="h3">
                     Cadastrar
                   </Typography>
-
                   <TextField
                     name="nome"
                     label="Nome completo"
@@ -99,6 +98,8 @@ function CadastroUsuario() {
                   <TextField
                     name="usuario"
                     label="Endereço de e-mail"
+                    type='email'
+                    required
                     value={usuario.usuario}
                     onChange={(event: ChangeEvent<HTMLInputElement>) => updateModel(event)}
                   />

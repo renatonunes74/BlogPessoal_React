@@ -4,17 +4,28 @@ import { Grid, Box, Typography, TextField, Button } from '@mui/material';
 import { Link, useNavigate } from 'react-router-dom';
 import { UsuarioLogin } from '../../model/UsuarioLogin';
 import { login } from '../../service/service';
-import useLocalStorage from 'react-use-localstorage';
+import { useDispatch } from 'react-redux';
+import { addId, addToken } from '../../store/tokens/action';
+import { toast } from 'react-toastify';
 
 function Login() {
   // cria a variavel para navegação interna pela rota
   const navigate = useNavigate();
+  const dispatch = useDispatch()
 
   // cria um estado para armazenamento no localStorage do navegador
-  const [token, setToken] = useLocalStorage('token');
+  const [token, setToken] = useState('');
 
   // cria um estado de controle para o usuário preencher os dados de login
   const [usuarioLogin, setUsuarioLogin] = useState<UsuarioLogin>({
+    id: 0,
+    nome: '',
+    usuario: '',
+    senha: '',
+    foto: '',
+    token: '',
+  });
+  const [respUsuarioLogin, setRespUsuarioLogin] = useState<UsuarioLogin>({
     id: 0,
     nome: '',
     usuario: '',
@@ -36,30 +47,60 @@ function Login() {
     // previne que o formulario atualize a pagina
     event.preventDefault();
     try {
-      await login('/usuarios/logar', usuarioLogin, setToken);
-      alert('Usuario logado com sucesso');
+      await login('/usuarios/logar', usuarioLogin, setRespUsuarioLogin);
+      // alert('Usuario logado com sucesso');
+      toast.success('Usuário logado com sucesso', {
+        position: "top-center",
+        autoClose: 2000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "colored",
+        });
     } catch (error) {
-      alert('Usuário e/ou senha inválidos');
+      // alert('Usuário e/ou senha inválidos');
+      toast.error('Usuário e/ou senha inválidos', {
+        position: "top-center",
+        autoClose: 2000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "colored",
+        });
     }
   }
 
   // Efeito que fica de olho no token, e quando chega algo diferente de vazio, navega o usuario pra home
   useEffect(() => {
     if (token !== '') {
-      navigate('/home');
+      // dispatch(addToken(token))
+      // navigate('/home');
     }
   }, [token]);
+
+  useEffect(() => {
+    if(respUsuarioLogin.token !== ''){
+      dispatch(addToken(respUsuarioLogin.token))
+      dispatch(addId(respUsuarioLogin.id.toString()))
+      navigate('/home');
+      console.log({respUsuarioLogin});
+    }
+  }, [respUsuarioLogin.token])
 
   return (
     <>
       <Grid container alignItems={'center'}>
         <Grid item xs={6}>
           <Box display={'flex'} justifyContent={'center'}>
-            <Grid xs={6} gap={2} display={'flex'} flexDirection={'column'}>
+            <Grid item xs={6} gap={2} display={'flex'} flexDirection={'column'}>
               <form onSubmit={enviar}>
                 <Box display={'flex'} flexDirection={'column'} gap={2}>
                   <Typography align="center" variant="h3">
-                    Login
+                    Logar nessa maravilha de blog
                   </Typography>
 
                   <TextField
@@ -75,6 +116,8 @@ function Login() {
                     name="senha"
                     label="Senha"
                     type="password"
+                    error={usuarioLogin.senha.length < 8 && usuarioLogin.senha.length > 0}
+                    helperText={usuarioLogin.senha.length < 8 && usuarioLogin.senha.length > 0 ? 'Tem que ter mais de 8 caracteres' : ''}
                     value={usuarioLogin.senha}
                     onChange={(event: ChangeEvent<HTMLInputElement>) =>
                       updateModel(event)
